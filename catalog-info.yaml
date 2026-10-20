@@ -1,0 +1,95 @@
+# mlflow · Backstage catalog entity
+# Auto-generated 2026-09-06 by scripts/gen_catalogs.py (Docs Rollout Phase 2 item 05)
+# Schema spec: ../README.md
+# TODO fields need human input.
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+
+metadata:
+  name: mlflow
+  title: Mlflow
+  description: >  # TODO — 1-2 sentences of what it does and who uses it
+    <describe>
+  annotations:
+    github.com/project-slug: AGM-One-Vision/mlflow  # TODO verify
+    aws.amazon.com/ecs-service-arn: arn:aws:ecs:eu-central-1:913524945562:service/agm-connect-prod-cluster/mlflow-prod-service
+    backstage.io/techdocs-ref: dir:.
+    agm.io/cost-tag: mlflow
+    agm.io/alb-priority: "TODO"
+    agm.io/runbook-url: runbooks/mlflow.md  # TODO — draft if missing
+    #     agm.io/incident-channel: null  # removed 2026-09-07 — Backstage rejects null annotations
+  tags:
+    - analytics-and-data
+  links:
+    - url: https://mlflow.agmegypt.com  # TODO — real public URL
+      title: Public URL
+      icon: web
+
+spec:
+  type: service
+  lifecycle: production
+  owner: group:devops
+  system: analytics-and-data
+  dependsOn:
+    - resource:default/agm-connect-prod-cluster
+    - resource:default/shared-alb
+    - resource:default/shared-prod-pg
+    - resource:default/s3-mlflow-artifacts
+  consumesApis: []
+  providesApis: []
+
+  agm:
+    criticality: P2
+    uptime_sla: "99%"  # TODO
+    environments:
+      - prod
+    #     public_url: null  # removed 2026-09-07 — Backstage rejects null annotations
+    auth: TODO  # public | azure-ad-oidc | basic-auth | app-managed | internal-only
+    #     contains_pii: null  # removed 2026-09-07 — Backstage rejects null annotations
+
+    compute:
+      launch_type: fargate
+      cluster: agm-connect-prod-cluster
+      service_name: mlflow-prod-service
+      task_definition_family: mlflow-prod
+      task_definition_revision: 4
+      cpu: 1024
+      memory_mb: 2048
+      desired_count: 1
+      ecr_repo: mlflow
+      image_tag_convention: prod-<git-sha>
+    tasks:
+      - name: mlflow-prod-service
+        cpu: 1024
+        memory_mb: 2048
+
+
+    datastores:
+      - resource:default/shared-prod-pg
+      - resource:default/s3-mlflow-artifacts
+
+    secrets:
+      ssm_path: /mlflow/prod/
+      count: 7
+      known_keys: []  # TODO enumerate from SSM
+
+    monitoring:
+      alarms: []  # TODO — filter by service from alarm-runbook-coverage doc
+      dashboard_url: null
+
+    cost:
+      tag_key: Project
+      tag_value: mlflow
+      monthly_estimate_usd: 0  # TODO from Cost Explorer
+
+    incident:
+      on_call: omar.mohamed@aboughalymotors.com
+      channel_url: null
+      runbook: runbooks/mlflow.md  # TODO
+
+    provenance:
+      cataloged_at: "2026-09-06"
+      cataloged_by: devops-generator
+      last_updated_at: "2026-09-06"
+      source_of_truth: agm-infrastructure/environments/prod/mlflow.tf  # TODO verify
